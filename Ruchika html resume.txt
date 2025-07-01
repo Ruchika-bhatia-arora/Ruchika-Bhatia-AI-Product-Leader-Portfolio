@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruchika Bhatia | AI & Digital Product Leader</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!--
+Chosen Palette: Vibrant Blues & Greens. A more colorful and energetic scheme using a light off-white background (bg-gray-50), dark gray for main text (text-gray-800), and vibrant blues (blue-600, blue-700) and greens (green-500, green-600) for accents, interactive elements, and charts.
+Application Structure Plan: A dynamic, dashboard-style SPA to transform the static resume. Key sections are an interactive timeline for experience, a filterable skills explorer, and a data-driven "Impact Dashboard" with charts to visualize key achievements. This structure prioritizes immediate value communication to recruiters and encourages exploration over passive reading, making the candidate's story more engaging and memorable.
+Visualization & Content Choices:
+- Onboarding Time Reduction (88%) -> Goal: Inform/Impact -> Viz: Chart.js Doughnut chart & large number callout -> Interaction: Hover tooltips, number animation on load -> Justification: Visually compelling, highlights key efficiency gain. -> Library: Chart.js.
+- Compliance Automation (70%) & Agile Optimization (30%) -> Goal: Inform/Impact -> Viz: Chart.js Bar chart & large number callouts -> Interaction: Hover tooltips, number animation on load -> Justification: Compares two significant process improvements side-by-side. -> Library: Chart.js.
+- Professional Experience -> Goal: Organize/Inform -> Viz: Interactive vertical timeline -> Interaction: Click-to-expand details with "Read More/Less" toggle -> Justification: Breaks up a long text block, makes exploring career progression engaging while controlling information overload. -> Library/Method: HTML/CSS/JS.
+- Core Skills -> Goal: Organize/Inform -> Viz: Filterable card layout -> Interaction: Click category buttons to filter skill cards -> Justification: Allows recruiters to quickly see skill depth in specific areas of interest (e.g., AI) without scrolling through all. -> Library/Method: HTML/CSS/JS.
+- Key Projects -> Goal: Inform/Showcase -> Viz: Project cards with detail modal -> Interaction: Click card to open modal with more project description -> Justification: Provides a high-level overview with optional drill-down for interested recruiters, adding depth without cluttering the main page. -> Library/Method: HTML/CSS/JS.
+CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+-->
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #f9fafb; /* bg-gray-50 */
+color: #374151; /* text-gray-700 */
+}
+.chart-container {
+position: relative;
+height: 320px;
+width: 100%;
+max-width: 400px;
+margin: auto;
+}
+@media (min-width: 768px) {
+.chart-container {
+height: 350px;
+max-width: 450px;
+}
+}
+.nav-link {
+transition: color 0.3s, border-bottom-color 0.3s;
+}
+.nav-link:hover, .nav-link.active {
+color: #2563eb; /* text-blue-600 */
+border-bottom-color: #2563eb;
+}
+.timeline-item-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+}
+.timeline-item-content.open {
+max-height: 1000px; /* Large enough to fit content */
+padding-top: 0.75rem;
+padding-bottom: 0.75rem;
+}
+.skill-card {
+transition: transform 0.3s, box-shadow 0.3s;
+}
+.skill-card:hover {
+transform: translateY(-5px);
+}
+.filter-button {
+transition: background-color 0.3s, color 0.3s;
+}
+.filter-button.active {
+background-color: #2563eb; /* blue-600 */
+color: white;
+}
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.6);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+opacity: 0;
+visibility: hidden;
+transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+.modal-overlay.open {
+opacity: 1;
+visibility: visible;
+}
+.modal-content {
+background-color: white;
+padding: 2rem;
+border-radius: 0.75rem;
+box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+max-width: 90%;
+max-height: 90%;
+overflow-y: auto;
+position: relative;
+transform: translateY(20px);
+opacity: 0;
+transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.modal-overlay.open .modal-content {
+transform: translateY(0);
+opacity: 1;
+}
+.close-button {
+position: absolute;
+top: 1rem;
+right: 1rem;
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+color: #6b7280; /* gray-500 */
+}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- Header & Navigation -->
+<header id="header" class="bg-gray-50/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+<div class="container mx-auto px-6 py-4 flex justify-between items-center">
+<div>
+<h1 class="text-xl md:text-2xl font-bold text-gray-800">Ruchika Bhatia</h1>
+<p class="text-sm text-blue-600 font-medium">AI & Digital Product Leader</p>
+</div>
+<nav class="hidden md:flex space-x-8">
+<a href="#impact" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Impact</a>
+<a href="#experience" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Experience</a>
+<a href="#skills" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Skills</a>
+<a href="#projects" class="nav-link text-gray-600 font-medium pb-1 border-b-2 border-transparent">Projects</a>
+</nav>
+<div class="md:hidden">
+<a href="https://www.linkedin.com/in/ruchika-bhatia-xxxxxxx/" target="_blank" class="text-blue-600 hover:text-blue-700 font-semibold">Contact</a>
+</div>
+</div>
+</header>
+
+<main class="container mx-auto px-6 py-12">
+
+<!-- Intro Section -->
+<section id="intro" class="text-center mb-20">
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-800 mb-4">Transforming Business with AI-Powered Product Leadership</h2>
+<p class="max-w-3xl mx-auto text-base md:text-lg text-gray-600 mb-8">
+I'm a Product Manager and Certified Business Analyst specializing in Product Lifecycle Management (PLM) for scalable platforms. I deliver measurable outcomes for global brands by leading products from strategic planning and stakeholder discovery to launch and post-launch optimization.
+</p>
+<a href="https://www.linkedin.com/in/ruchika-bhatia-xxxxxxx/" target="_blank" class="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
+View LinkedIn Profile
+</a>
+</section>
+
+<!-- Impact Dashboard Section -->
+<section id="impact" class="mb-20 py-12 bg-white rounded-2xl shadow-lg">
+<div class="text-center mb-12 px-4">
+<h3 class="text-2xl md:text-3xl font-bold text-gray-800">Quantifiable Impact Dashboard</h3>
+<p class="text-gray-500 mt-2 max-w-2xl mx-auto">This dashboard highlights the key metrics and efficiency gains driven by my product initiatives. The data demonstrates a strong focus on automation, process optimization, and delivering tangible business value.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-center px-4">
+<div class="flex flex-col items-center text-center p-6 bg-gray-50 rounded-xl">
+<span id="onboarding-percent" class="text-5xl lg:text-6xl font-extrabold text-blue-600">0%</span>
+<p class="mt-2 font-semibold text-gray-700">Onboarding Time Reduction</p>
+<p class="text-sm text-gray-500">From 17 days down to 2 days</p>
+</div>
+<div class="chart-container">
+<canvas id="onboardingChart"></canvas>
+</div>
+<div class="lg:col-span-3 pt-8 mt-8 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="flex flex-col items-center text-center p-4">
+<span id="irs-risk-percent" class="text-4xl font-bold text-gray-800">0%</span>
+<p class="mt-2 font-medium text-gray-600">Reduction in IRS Penalty Risks</p>
+</div>
+<div class="chart-container">
+<canvas id="complianceAgileChart"></canvas>
+</div>
+<div class="flex flex-col items-center text-center p-4">
+<span id="sprint-velocity-percent" class="text-4xl font-bold text-gray-800">0%</span>
+<p class="mt-2 font-medium text-gray-600">Boost in Agile Sprint Velocity</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Experience Timeline Section -->
+<section id="experience" class="mb-20">
+<div class="text-center mb-12">
+<h3 class="text-2xl md:text-3xl font-bold text-gray-800">Career Journey</h3>
+<p class="text-gray-500 mt-2 max-w-2xl mx-auto">This interactive timeline showcases my professional experience and key achievements in each role. Click on any position to expand and view the detailed contributions and outcomes.</p>
+</div>
+<div id="timeline-container" class="relative max-w-3xl mx-auto">
+<!-- Vertical line -->
+<div class="absolute left-4 sm:left-1/2 top-0 h-full w-0.5 bg-gray-200"></div>
+<!-- Timeline items will be injected here by JS -->
+</div>
+</section>
+
+<!-- Skills Section -->
+<section id="skills" class="mb-20">
+<div class="text-center mb-12">
+<h3 class="text-2xl md:text-3xl font-bold text-gray-800">Core Competencies & Technical Skills</h3>
+<p class="text-gray-500 mt-2 max-w-2xl mx-auto">A comprehensive overview of my capabilities across product management, agile delivery, AI/automation, and the technical platforms and tools I utilize to build and scale products. Use the filters below to explore specific skill sets.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-3 mb-8">
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300 active" data-category="All">All Skills</button>
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300" data-category="Product Management">Product Management</button>
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300" data-category="Agile Delivery">Agile Delivery</button>
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300" data-category="AI & Automation">AI & Automation</button>
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300" data-category="Platforms & Integrations">Platforms & Integrations</button>
+<button class="filter-button bg-gray-200 text-gray-700 px-5 py-2 rounded-full font-medium hover:bg-gray-300" data-category="Tools & Software">Tools & Software</button>
+</div>
+<div id="skills-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Skill cards will be injected here by JS -->
+</div>
+</section>
+
+<!-- Projects Showcase Section -->
+<section id="projects" class="mb-20">
+<div class="text-center mb-12">
+<h3 class="text-2xl md:text-3xl font-bold text-gray-800">Key Project Highlights</h3>
+<p class="text-gray-500 mt-2 max-w-2xl mx-auto">A selection of high-impact projects I've led, demonstrating my ability to handle enterprise-level integrations, high-profile platform deliveries, and critical automation initiatives. Click on any project to learn more.</p>
+</div>
+<div id="projects-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Project cards will be injected here by JS -->
+</div>
+</section>
+
+</main>
+
+<footer class="bg-gray-800 text-gray-300 py-8">
+<div class="container mx-auto px-6 text-center">
+<p class="font-bold text-lg text-white">Ruchika Bhatia</p>
+<p class="text-sm mt-2">Seeking remote/hybrid roles (USA, UK, EU, APAC) with relocation and visa sponsorship.</p>
+<div class="mt-4">
+<a href="mailto:ruchikabhatia1010@gmail.com" class="text-blue-400 hover:text-blue-300 transition-colors">ruchikabhatia1010@gmail.com</a>
+</div>
+</div>
+</footer>
+
+<!-- Project Detail Modal -->
+<div id="project-modal-overlay" class="modal-overlay">
+<div class="modal-content">
+<button id="close-modal-button" class="close-button">&times;</button>
+<h4 id="modal-project-title" class="text-2xl font-bold text-gray-800 mb-4"></h4>
+<p id="modal-project-description" class="text-gray-700"></p>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+// --- DATA STORE ---
+const resumeData = {
+experience: [
+{
+company: 'eXp Realty',
+location: 'Remote (United States)',
+role: 'Product Lead',
+duration: 'Jan 2023 - Present',
+details: [
+'Achieved rapid progression (Technical BA → Sr. BA → Product Lead) within 1 year, demonstrating exceptional performance and leadership.',
+'Spearheaded the launch of Join-Fast, an AI-powered onboarding application (Flutter) for Canadian agents, reducing onboarding time from 17 days to 2 days (88% efficiency gain).',
+'Collaborated closely with business partners and key stakeholders to gather comprehensive requirements, define user stories, and create prototypes for critical product features.',
+'Investigated, designed, and implemented automated W9 compliance workflows, reducing manual intervention and IRS penalty risks by 70%.',
+'Developed Kafka-based real-time onboarding update systems, improving data validation speed by 60% for critical agent information.',
+'Owned and managed the product backlog and roadmap for key initiatives; led sprint planning, refinement, UAT, and cross-functional stakeholder reviews.',
+'Delivered the GENIE Platform for Shark Tank US, a comprehensive MLS and lead management tool, enhancing agent productivity and lead conversion.',
+'Optimized onboarding and API performance through proactive DataDog monitoring and actionable insights.'
+]
+},
+{
+company: 'Freelance AI Trainer',
+location: 'Remote',
+role: 'Outlier, Aligner, Coding Wolf',
+duration: '2022 - 2023',
+details: [
+'Trained production-level Large Language Models (LLMs) for EdTech and social media AI bots, focusing on natural language understanding and generation.',
+'Developed emotion-aware conversational AI models for Instagram, achieving 90%+ sentiment accuracy and enhancing user engagement.',
+'Optimized conversational UX and bot KPIs by 40% through iterative design and performance analysis.',
+'Provided expert prompt engineering and training data feedback loops to improve AI model efficacy and robustness.'
+]
+},
+{
+company: 'Source Mash Technologies',
+location: 'India',
+role: 'Product Owner / Business Analyst',
+duration: 'Jan 2022 - Jan 2023',
+details: [
+'Successfully managed stakeholder relationships with business partners for Larsen & Juhl (a Berkshire Hathaway company), gathering and refining product requirements.',
+'Led complete product lifecycle for Kimball International and Poppin on Salesforce, from requirement gathering to UAT and successful launch.',
+'Developed wireframes and interactive prototypes to visualize solutions and validate user flows with stakeholders.',
+'Automated A+ content delivery pipelines for major brands (Reebok & Tommy Hilfiger) on Amazon.',
+'Facilitated backlog grooming, UAT, and Jira-based sprint planning.'
+]
+},
+{
+company: 'Mindroots Pvt Ltd',
+location: 'India',
+role: 'Senior Business Analyst / Product Owner',
+duration: '2020 - 2022',
+details: [
+'Delivered Upscribbr, a US-based subscription billing platform, managing the product from concept to successful launch.',
+'Automated contract, billing, and provisioning flows, reducing turnaround time by 70%.',
+'Collaborated closely with DevOps teams to align product backlog with CI/CD pipelines and release cycles.',
+'Drove stakeholder discovery, user story creation, UAT, and release readiness activities.'
+]
+}
+],
+skills: [
+{
+category: 'Product Management',
+icon: '&#128200;', // Chart Increasing
+items: ['Product Strategy', 'PLM', 'SaaS Roadmaps', 'GTM Strategy', 'MVP Definition', 'A/B Testing', 'User Research', 'CX', 'OKRs', 'KPI Definition', 'Competitive Analysis', 'Product Roadmapping', 'Release Management', 'Post-Launch Optimization', 'Product Evolution']
+},
+{
+category: 'Agile Delivery',
+icon: '&#128360;', // Clockwise arrows
+items: ['Scrum', 'SAFe', 'User Stories', 'MoSCoW Prioritization', 'Sprint Planning', 'Backlog Grooming', 'UAT', 'Release Management']
+},
+{
+category: 'AI & Automation',
+icon: '&#129302;', // Robot face
+items: ['AI Product Leadership', 'Prompt Engineering', 'LLM Training', 'Emotion-aware AI', 'W9 Compliance Automation', 'Workflow Design', 'AI/ML Productization']
+},
+{
+category: 'Platforms & Integrations',
+icon: '&#128279;', // Link
+items: ['Kafka', 'Salesforce CRM', 'Mendix (Low-Code)', 'SkySlope', 'Payment Gateways', 'Microsoft Dynamics', 'Magento eCommerce', 'RESTful APIs']
+},
+{
+category: 'Tools & Software',
+icon: '&#128187;', // Laptop
+items: ['Jira', 'Confluence', 'Figma', 'Miro', 'DataDog', 'Trello', 'Terraform', 'Flutter', 'Notion', 'Coda', 'Power BI', 'Excel', 'Google Sheets', 'SQL']
+}
+],
+projects: [
+{
+title: 'AI-Driven Onboarding',
+description: 'Spearheaded the launch of Join-Fast, an AI-powered onboarding application (Flutter) for Canadian agents, significantly reducing onboarding time from 17 days to 2 days (88% efficiency gain). This project streamlined the initial agent experience and accelerated productivity.',
+icon: '&#128640;'
+},
+{
+title: 'Compliance Automation',
+description: 'Investigated, designed, and implemented automated W9 compliance workflows, which drastically reduced manual intervention and mitigated IRS penalty risks by 70%. This initiative enhanced operational efficiency and regulatory adherence.',
+icon: '&#128176;'
+},
+{
+title: 'Enterprise Integrations',
+description: 'Delivered complex CRM/ERP integrations for major enterprise clients, including Larsen & Juhl (a Berkshire Hathaway company) and leading the Salesforce product for Kimball International & Poppin. These integrations streamlined critical business processes and data flow across systems.',
+icon: '&#127970;'
+},
+{
+title: 'High-Profile Platform Delivery',
+description: 'Successfully delivered the GENIE Platform for Shark Tank US, a comprehensive MLS and lead management tool. This platform enhanced agent productivity and lead conversion for a high-visibility client.',
+icon: '&#128250;'
+},
+{
+title: 'Production AI Model Training',
+description: 'Trained 3 production-ready AI bots, including advanced emotion-aware conversational AI models for Instagram, achieving over 90% sentiment accuracy. This work directly optimized conversational UX and bot KPIs by 40%.',
+icon: '&#129504;'
+},
+{
+title: 'Agile Optimization & KPI-Driven Development',
+description: 'Boosted sprint velocity by 30% through effective backlog and sprint management. Led MVP and roadmap aligned with key performance indicators and customer value, ensuring product development was always focused on measurable business impact.',
+icon: '&#127939;'
+}
+]
+};
+
+// --- CHART.JS IMPLEMENTATION ---
+const onboardingChartCtx = document.getElementById('onboardingChart').getContext('2d');
+new Chart(onboardingChartCtx, {
+type: 'doughnut',
+data: {
+labels: ['Time Saved (88%)', 'New Onboarding Time (12%)'],
+datasets: [{
+label: 'Onboarding Efficiency Gain',
+data: [88, 12],
+backgroundColor: [
+'#2563eb', // blue-600
+'#bfdbfe' // blue-200
+],
+borderColor: '#f9fafb',
+borderWidth: 4,
+hoverOffset: 8
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+cutout: '70%',
+plugins: {
+legend: {
+position: 'bottom',
+labels: {
+color: '#4b5563', // gray-600
+font: {
+family: "'Inter', sans-serif",
+size: 14
+}
+}
+},
+tooltip: {
+callbacks: {
+label: function(context) {
+let label = context.label || '';
+if (label) {
+label += ': ';
+}
+if (context.parsed !== null) {
+label += context.parsed + '%';
+}
+return label;
+}
+}
+},
+title: {
+display: true,
+text: 'Onboarding Time Reduction',
+color: '#1f2937', // gray-800
+font: {
+size: 16,
+weight: 'bold',
+family: "'Inter', sans-serif"
+},
+padding: {
+top: 10,
+bottom: 20
+}
+}
+}
+}
+});
+
+const complianceAgileChartCtx = document.getElementById('complianceAgileChart').getContext('2d');
+new Chart(complianceAgileChartCtx, {
+type: 'bar',
+data: {
+labels: ['IRS Risk Reduction', 'Sprint Velocity Boost'],
+datasets: [{
+label: 'Impact Percentage',
+data: [70, 30],
+backgroundColor: [
+'#10b981', // green-500
+'#34d399' // green-400
+],
+borderColor: '#f9fafb',
+borderWidth: 1
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: {
+display: false
+},
+tooltip: {
+callbacks: {
+label: function(context) {
+let label = context.dataset.label || '';
+if (label) {
+label += ': ';
+}
+if (context.parsed.y !== null) {
+label += context.parsed.y + '%';
+}
+return label;
+}
+}
+},
+title: {
+display: true,
+text: 'Process Improvement Metrics',
+color: '#1f2937',
+font: {
+size: 16,
+weight: 'bold',
+family: "'Inter', sans-serif"
+},
+padding: {
+top: 10,
+bottom: 20
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+max: 100,
+ticks: {
+callback: function(value) {
+return value + '%';
+},
+color: '#4b5563',
+font: {
+family: "'Inter', sans-serif"
+}
+},
+grid: {
+color: '#e5e7eb' /* gray-200 */
+}
+},
+x: {
+ticks: {
+color: '#4b5563',
+font: {
+family: "'Inter', sans-serif"
+},
+callback: function(value, index, values) {
+const label = this.getLabelForValue(value);
+if (label.length > 16) {
+return label.split(' ').reduce((acc, word) => {
+if (acc.length === 0 || acc[acc.length - 1].length + word.length + 1 > 16) {
+acc.push(word);
+} else {
+acc[acc.length - 1] += ' ' + word;
+}
+return acc;
+}, []);
+}
+return label;
+}
+},
+grid: {
+display: false
+}
+}
+}
+}
+});
+
+// --- NUMBER ANIMATION ---
+function animateNumber(id, finalValue, duration = 1000) {
+const element = document.getElementById(id);
+if (!element) return;
+const start = 0;
+let startTime = null;
+
+function step(currentTime) {
+if (!startTime) startTime = currentTime;
+const progress = Math.min((currentTime - startTime) / duration, 1);
+element.textContent = Math.floor(progress * finalValue) + '%';
+if (progress < 1) {
+requestAnimationFrame(step);
+}
+}
+requestAnimationFrame(step);
+}
+
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+if (entry.target.id === 'onboarding-percent' && entry.target.textContent === '0%') {
+animateNumber('onboarding-percent', 88);
+}
+if (entry.target.id === 'irs-risk-percent' && entry.target.textContent === '0%') {
+animateNumber('irs-risk-percent', 70);
+}
+if (entry.target.id === 'sprint-velocity-percent' && entry.target.textContent === '0%') {
+animateNumber('sprint-velocity-percent', 30);
+}
+}
+});
+}, { threshold: 0.5 }); /* Trigger when 50% of element is visible */
+
+observer.observe(document.getElementById('onboarding-percent'));
+observer.observe(document.getElementById('irs-risk-percent'));
+observer.observe(document.getElementById('sprint-velocity-percent'));
+
+// --- DYNAMIC CONTENT RENDERING ---
+
+// Render Experience Timeline
+const timelineContainer = document.getElementById('timeline-container');
+resumeData.experience.forEach((job, index) => {
+const isLeft = index % 2 === 0;
+const timelineItem = document.createElement('div');
+timelineItem.className = `timeline-item mb-8 flex justify-between items-center w-full ${isLeft ? '' : 'flex-row-reverse'}`;
+
+const contentHTML = `
+<div class="order-1 w-5/12"></div>
+<div class="z-20 flex items-center order-1 bg-blue-600 shadow-xl w-8 h-8 rounded-full">
+<h1 class="mx-auto font-semibold text-lg text-white">${resumeData.experience.length - index}</h1>
+</div>
+<div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 cursor-pointer timeline-item-header">
+<p class="text-sm text-gray-500">${job.duration}</p>
+<h4 class="font-bold text-gray-800 text-lg">${job.role}</h4>
+<p class="font-semibold text-blue-700">${job.company}</p>
+<div class="timeline-item-content mt-3 pt-3 border-t border-gray-200">
+<ul class="list-disc list-inside space-y-2 text-gray-600 text-sm">
+${job.details.map(d => `<li>${d}</li>`).join('')}
+</ul>
+<button class="read-more-toggle mt-2 text-blue-600 hover:underline text-sm font-medium">Read More</button>
+</div>
+</div>
+`;
+const mobileContentHTML = `
+<div class="z-20 flex items-center order-1 bg-blue-600 shadow-xl w-8 h-8 rounded-full -ml-4">
+<h1 class="mx-auto font-semibold text-lg text-white">${resumeData.experience.length - index}</h1>
+</div>
+<div class="order-1 bg-white rounded-lg shadow-xl flex-1 ml-4 px-6 py-4 cursor-pointer timeline-item-header">
+<p class="text-sm text-gray-500">${job.duration}</p>
+<h4 class="font-bold text-gray-800 text-lg">${job.role}</h4>
+<p class="font-semibold text-blue-700">${job.company}</p>
+<div class="timeline-item-content mt-3 pt-3 border-t border-gray-200">
+<ul class="list-disc list-inside space-y-2 text-gray-600 text-sm">
+${job.details.map(d => `<li>${d}</li>`).join('')}
+</ul>
+<button class="read-more-toggle mt-2 text-blue-600 hover:underline text-sm font-medium">Read More</button>
+</div>
+</div>
+`;
+
+if (window.innerWidth < 640) {
+timelineItem.innerHTML = mobileContentHTML;
+timelineItem.classList.remove('justify-between');
+} else {
+timelineItem.innerHTML = contentHTML;
+}
+
+timelineContainer.appendChild(timelineItem);
+});
+
+// Render Skills (initial render)
+const skillsContainer = document.getElementById('skills-container');
+function renderSkills(filterCategory = 'All') {
+skillsContainer.innerHTML = ''; // Clear existing cards
+resumeData.skills.forEach(skillCat => {
+if (filterCategory === 'All' || skillCat.category === filterCategory) {
+const skillCard = document.createElement('div');
+skillCard.className = 'skill-card bg-white p-6 rounded-xl shadow-lg';
+skillCard.innerHTML = `
+<div class="flex items-center mb-4">
+<span class="text-3xl mr-4 text-green-600">${skillCat.icon}</span>
+<h4 class="text-xl font-bold text-gray-800">${skillCat.category}</h4>
+</div>
+<div class="flex flex-wrap gap-2">
+${skillCat.items.map(item => `<span class="bg-gray-100 text-gray-600 text-sm font-medium px-3 py-1 rounded-full">${item}</span>`).join('')}
+</div>
+`;
+skillsContainer.appendChild(skillCard);
+}
+});
+}
+renderSkills('All'); // Initial render
+
+// Skill filter buttons
+document.querySelectorAll('.filter-button').forEach(button => {
+button.addEventListener('click', (event) => {
+document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+renderSkills(event.target.dataset.category);
+});
+});
+
+// Render Projects
+const projectsContainer = document.getElementById('projects-container');
+const projectModalOverlay = document.getElementById('project-modal-overlay');
+const modalProjectTitle = document.getElementById('modal-project-title');
+const modalProjectDescription = document.getElementById('modal-project-description');
+const closeModalButton = document.getElementById('close-modal-button');
+
+resumeData.projects.forEach(project => {
+const projectCard = document.createElement('div');
+projectCard.className = 'bg-white p-6 rounded-xl shadow-lg flex flex-col cursor-pointer project-card';
+projectCard.innerHTML = `
+<div class="flex-shrink-0">
+<span class="text-4xl text-blue-600">${project.icon}</span>
+</div>
+<div class="mt-4 flex-grow">
+<h4 class="text-lg font-bold text-gray-800">${project.title}</h4>
+<p class="mt-1 text-gray-600 text-sm">${project.description.split('.')[0]}.</p> <!-- Show only first sentence for summary -->
+</div>
+`;
+projectCard.addEventListener('click', () => {
+modalProjectTitle.textContent = project.title;
+modalProjectDescription.textContent = project.description;
+projectModalOverlay.classList.add('open');
+});
+projectsContainer.appendChild(projectCard);
+});
+
+// Close modal event listeners
+closeModalButton.addEventListener('click', () => {
+projectModalOverlay.classList.remove('open');
+});
+projectModalOverlay.addEventListener('click', (event) => {
+if (event.target === projectModalOverlay) {
+projectModalOverlay.classList.remove('open');
+}
+});
+
+// --- EVENT LISTENERS ---
+
+// Timeline expand/collapse
+document.querySelectorAll('.timeline-item-header').forEach(header => {
+header.addEventListener('click', () => {
+const content = header.querySelector('.timeline-item-content');
+const toggleButton = header.querySelector('.read-more-toggle');
+content.classList.toggle('open');
+
+if (content.classList.contains('open')) {
+toggleButton.textContent = 'Read Less';
+} else {
+toggleButton.textContent = 'Read More';
+}
+});
+});
+
+// Nav link active state on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+
+window.addEventListener('scroll', () => {
+let current = '';
+sections.forEach(section => {
+const sectionTop = section.offsetTop;
+if (pageYOffset >= sectionTop - 100) {
+current = section.getAttribute('id');
+}
+});
+
+navLinks.forEach(link => {
+link.classList.remove('active');
+if (link.getAttribute('href').includes(current)) {
+link.classList.add('active');
+}
+});
+});
+});
+</script>
+</body>
+</html>
